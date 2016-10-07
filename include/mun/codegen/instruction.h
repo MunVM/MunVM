@@ -50,6 +50,8 @@ typedef struct _instruction{
   instruction_type type;
 } instruction;
 
+bool instr_is_definition(instruction* instr);
+
 input* instr_input_at(instruction* instr, word index);
 
 struct _block_entry_instr* instr_successor_at(instruction* instr, word index);
@@ -103,7 +105,17 @@ typedef struct _block_entry_instr{
 void block_clear_predecessors(block_entry_instr* block);
 void block_add_predecessor(block_entry_instr* block, block_entry_instr* predecessor);
 
+block_entry_instr* block_predecessor_at(block_entry_instr* block, word index);
+
+word block_predecessor_count(block_entry_instr* block);
+
 bool block_discover_blocks(block_entry_instr* block, block_entry_instr* predecessor, array* /* block_entry_instr* */ preorder, array* /* word */ parent);
+
+MUN_INLINE void
+block_add_dominated(block_entry_instr* block, block_entry_instr* dominated){
+  dominated->dominator = block;
+  array_add(&block->dominated, dominated);
+}
 
 #define FORWARD_ITER(Block) \
   for(instruction* it = ((instruction*) Block)->next; \
@@ -185,11 +197,14 @@ DECLARE_INSTRUCTION(parallel_move);
 DECLARE_INSTRUCTION(goto, join_entry_instr*);
 DECLARE_INSTRUCTION(store_local, local_variable*, input*);
 DECLARE_INSTRUCTION(load_local, local_variable*);
+DECLARE_INSTRUCTION(phi, join_entry_instr*, word);
 #undef DECLARE_INSTRUCTION
 
 instance* constant_instr_get_value(instruction* instr);
 
 instruction* graph_entry_instr_normalize(instruction* instr);
+
+phi_instr* join_entry_instr_insert_phi(join_entry_instr* join, word var_index, word var_count);
 
 HEADER_END
 

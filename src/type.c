@@ -97,5 +97,17 @@ script_new(mun_alloc* alloc, char* url){
   script->as.script.url = strdup(url);
   script->as.script.main = function_new(alloc, "__main__", kMOD_NONE)->as.func;
   script->as.script.main->ast = sequence_node_new(alloc);
+  script->as.script.main->ast->as.sequence.scope = local_scope_new(NULL);
   return script;
 }
+
+static table_key
+nil_hashcode(instance* self){
+  return 0x0;
+}
+
+instance NIL = {
+    kNilType,
+    { FALSE },
+    &nil_hashcode,
+};

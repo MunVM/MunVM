@@ -4,12 +4,12 @@
 static const instruction_definition* kDefinitions[] = {
     &kGraphEntryDefinition, // GraphEntry
     &kTargetEntryDefinition, // TargetEntry
-    NULL, // JoinEntry
+    &kJoinEntryDefinition, // JoinEntry
     NULL, // Goto
     NULL, // ParallelMove
     &kBoxDefinition, // Box
     &kUnboxDefinition, // Unbox
-    NULL, // Phi
+    &kPhiDefinition, // Phi
     NULL, // Drop
     &kConstantDefinition, // Constant
     &kReturnDefinition, // Return
@@ -70,6 +70,11 @@ instr_input_count(instruction* instr){
   return 0;
 }
 
+bool
+instr_is_definition(instruction* instr){
+  return kDefinitions[instr->type] != NULL;
+}
+
 void
 instr_set_input_at(instruction* instr, word index, input* value){
   value->instr = instr;
@@ -121,6 +126,24 @@ block_add_predecessor(block_entry_instr* block, block_entry_instr* predecessor){
   if(definition != NULL && definition->add_predecessor != NULL){
     definition->add_predecessor(block, predecessor);
   }
+}
+
+word
+block_predecessor_count(block_entry_instr* block){
+  const block_definition* definition = kBlockDefinitions[block->type];
+  if(definition != NULL && definition->predecessor_count != NULL){
+    return definition->predecessor_count(block);
+  }
+  return 0;
+}
+
+block_entry_instr*
+block_predecessor_at(block_entry_instr* block, word index){
+  const block_definition* definition = kBlockDefinitions[block->type];
+  if(definition != NULL && definition->predecessor_at != NULL){
+    return definition->predecessor_at(block, index);
+  }
+  return NULL;
 }
 
 MUN_INLINE bool
@@ -213,4 +236,26 @@ load_local_instr_new(local_variable* local){
   load->is_last = FALSE;
   load->local = local;
   return ((instruction*) load);
+}
+
+instruction*
+phi_instr_new(join_entry_instr* block, word num_inputs){
+  phi_instr* phi = malloc(sizeof(phi_instr));
+  instr_init(((instruction*) phi), kPhiInstr, phi);
+  phi->block = block;
+  phi->reaching = NULL;
+  phi->is_alive = FALSE;
+  array_init(&phi->inputs, num_inputs);
+  for(int i = 0; i < num_inputs; i++) array_add(&phi->inputs, NULL);
+  return ((instruction*) phi);
+}
+
+instruction*
+join_entry_instr_new(){
+  join_entry_instr* join = malloc(sizeof(join_entry_instr));
+  instr_init(((instruction*) join), kJoinEntryInstr, join);
+  block_init(((block_entry_instr*) join), kJoinEntryBlock);
+  array_init(&join->predecessors, 0x2);
+  join->phis = NULL;
+  return ((instruction*) join);
 }

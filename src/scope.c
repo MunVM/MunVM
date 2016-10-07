@@ -1,4 +1,5 @@
 #include <mun/scope.h>
+#include <mun/array.h>
 
 bool
 local_scope_add(local_scope* scope, local_variable* local){
@@ -40,6 +41,36 @@ local_scope_new(local_scope* parent){
     parent->child = new_scope;
   }
   return new_scope;
+}
+
+int
+local_scope_alloc_variables(local_scope* scope, int first_param_index, int num_params, int first_frame_index){
+  int pos = 0x0;
+  int frame_index = first_param_index;
+
+  while(pos < num_params){
+    local_variable* local = scope->variables.data[pos];
+    pos++;
+    local->index = frame_index--;
+  }
+
+  frame_index = first_frame_index;
+  while(pos < scope->variables.size){
+    local_variable* local = scope->variables.data[pos];
+    pos++;
+    if(local->owner == scope) local->index = frame_index--;
+  }
+
+  int min_frame_index = frame_index;
+
+  local_scope* child = scope->child;
+  while(child != NULL){
+    int child_frame_index = local_scope_alloc_variables(child, 0, 0, frame_index);
+    if(child_frame_index < min_frame_index) min_frame_index = child_frame_index;
+    child = child->sibling;
+  }
+
+  return min_frame_index;
 }
 
 local_variable*

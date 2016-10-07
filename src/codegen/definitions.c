@@ -1,3 +1,4 @@
+#include <mun/array.h>
 #include "all.h"
 
 NAME(return);
@@ -134,4 +135,23 @@ DEFINE(LoadLocal){
     NULL, // successor_count
     NULL, // input_at
     &load_local_name, // name
+};
+
+NAME(phi);
+INPUT_COUNT(phi, to_phi_instr(instr)->inputs.size);
+INPUT_AT(phi, inputs.data[index]);
+
+DEFINE(Phi){
+    &phi_set_input_at, // set_input_at
+    NULL, // compile
+    NULL, // get_representation
+    NULL, // get_input_representation
+    NULL, // make_location_summary
+    NULL, // argument_at
+    NULL, // successor_at
+    NULL, // argument_count
+    &phi_input_count, // input_count
+    NULL, // successor_count
+    &phi_input_at, // input_at
+    &phi_name, // name
 };

@@ -32,6 +32,8 @@ typedef uintptr_t uword;
 typedef uintptr_t location;
 
 static const size_t kWordSize = sizeof(word);
+static const int kBitsPerByte = 8;
+static const int kBitsPerWord = sizeof(word) * 8;
 
 typedef struct _mun_alloc mun_alloc;
 

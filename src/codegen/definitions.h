@@ -5,6 +5,8 @@
 #error "Please #include <mun/all.h> directly"
 #endif
 
+#include <mun/bitvec.h>
+
 struct _constant_instr{
   definition defn;
 
@@ -52,6 +54,15 @@ struct _load_local_instr{
 
   local_variable* local;
   bool is_last : 1;
+};
+
+struct _phi_instr{
+  definition defn;
+
+  join_entry_instr* block;
+  array inputs; // input*
+  bit_vector* reaching;
+  bool is_alive : 1;
 };
 
 #endif

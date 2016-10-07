@@ -39,6 +39,8 @@ typedef struct _instance{
   uint32_t (*hashcode)(struct _instance*);
 } instance;
 
+extern instance NIL;
+
 instance* string_new(mun_alloc* alloc, char* data);
 instance* table_new(mun_alloc* alloc, word len);
 instance* bool_new(mun_alloc* alloc, bool value);

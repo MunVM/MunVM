@@ -29,6 +29,27 @@ graph_init(flow_graph* graph, function* func, graph_entry_instr* entry){
   ARRAY(graph->reverse_postorder);
 }
 
+MUN_INLINE word
+graph_variable_count(flow_graph* graph){
+  return graph->func->num_copied_params +
+         func_num_non_copied_params(graph->func) +
+         graph->func->num_stack_locals;
+}
+
+MUN_INLINE word
+graph_alloc_ssa_temp_index(flow_graph* graph){
+  return graph->current_ssa_temp_index++;
+}
+
+MUN_INLINE void
+graph_alloc_ssa_indexes(flow_graph* graph, definition* defn){
+  defn->ssa_temp_index = graph_alloc_ssa_temp_index(graph);
+  graph_alloc_ssa_temp_index(graph);
+}
+
+definition* graph_get_constant(flow_graph* graph, instance* value);
+
+void graph_compute_ssa(flow_graph* graph, word vreg);
 void graph_discover_blocks(flow_graph* graph);
 
 typedef struct{

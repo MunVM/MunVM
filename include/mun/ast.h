@@ -36,6 +36,7 @@ struct _ast_node{
   union{
     struct{
       array* children; // ast_node*
+      local_scope* scope;
     } sequence;
     struct{
       instance* value;

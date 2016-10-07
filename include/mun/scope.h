@@ -58,6 +58,8 @@ local_scope_insert_param(local_scope* scope, word index, local_variable* var){
   return TRUE;
 }
 
+int local_scope_alloc_variables(local_scope* scope, int first_param_index, int num_params, int first_frame_index);
+
 HEADER_END
 
 #endif

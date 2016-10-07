@@ -16,12 +16,16 @@ typedef struct{
 void array_init(array* self, word size);
 void array_resize(array* self, word nasize);
 void array_dispose(array* self);
+void arraycpy(array* to, array* from, int offset, int length);
 
 #define ARRAY(Name) \
   array_init(&Name, 0xA)
 
 #define ARRAY_CLEAR(Name) \
   Name.size = 0x0
+
+#define ARRAYCPY(to, from) \
+  arraycpy(to, from, 0, (from)->size)
 
 MUN_INLINE V
 array_last(array* self){

@@ -15,8 +15,11 @@ main(int argc, char** argv){
   flow_graph_builder builder;
   graph_builder_init(&builder, load->as.script.main);
 
+  func_alloc_variables(load->as.script.main);
+
   flow_graph* graph = graph_build(&builder);
   graph_discover_blocks(graph);
+  graph_compute_ssa(graph, 0x0);
 
   int count = 0x0;
   FORWARD_ITER(graph_entry_instr_normalize(((instruction*) graph->graph_entry))){
