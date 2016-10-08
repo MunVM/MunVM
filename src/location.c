@@ -1,4 +1,6 @@
 #include <mun/location.h>
+#include <mun/stack_frame.h>
+#include <mun/codegen/instruction.h>
 
 enum {
   kBitsForKind = 4,
@@ -76,6 +78,11 @@ loc_init_a(location* loc) {
 }
 
 void
+loc_init_c(location* loc, constant_instr* c){
+  *loc = ((uword) c) | kConstant;
+}
+
+void
 loc_init_r(location* loc, asm_register reg) {
   *loc = allocated(kRegister, reg);
 }
@@ -139,6 +146,34 @@ loc_hint_rx(location* loc) {
 word
 loc_get_stack_slot(location loc) {
   return bit_field_decode(&kStackIndexField, loc_get_payload(loc)) - kStackIndexBias;
+}
+
+asm_register
+loc_get_stack_register(location loc){
+  return ((asm_register) bit_field_decode(&kStackSlotBaseField, loc_get_payload(loc)));
+}
+
+constant_instr*
+loc_get_constant(location loc){
+  return ((constant_instr*) (loc & ~kLocationMask));
+}
+
+void
+loc_encode_stack_address(location loc, asm_address* addr){
+  word index = loc_get_stack_slot(loc);
+  asm_register base = loc_get_stack_register(loc);
+
+  if(base == FPREG){
+    if(index < 0){
+      word offset = (kParamEndSlotFromFp - index) * kWordSize;
+      asm_addr_init_r(addr, base, offset);
+    } else{
+      word offset = (kFirstLocalSlotFromFp - index) * kWordSize;
+      asm_addr_init_r(addr, base, offset);
+    }
+  } else{
+    asm_addr_init_r(addr, base, index * kWordSize);
+  }
 }
 
 location_summary*

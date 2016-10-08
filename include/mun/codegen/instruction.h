@@ -7,8 +7,8 @@ HEADER_BEGIN
 
 #include "../type.h"
 #include "../array.h"
-#include "../location.h"
 #include "../function.h"
+#include "../asm.h"
 
 #define FOR_EACH_INSTRUCTION(V) \
   V(GraphEntry) \
@@ -46,7 +46,7 @@ typedef struct _instruction{
   struct _instruction* prev;
   void* ptr;
   word lifetime_pos;
-  location_summary* locations;
+  struct _location_summary* locations;
   instruction_type type;
 } instruction;
 
@@ -205,6 +205,8 @@ instance* constant_instr_get_value(instruction* instr);
 instruction* graph_entry_instr_normalize(instruction* instr);
 
 phi_instr* join_entry_instr_insert_phi(join_entry_instr* join, word var_index, word var_count);
+
+bool parallel_move_instr_is_redundant(parallel_move_instr* moves);
 
 HEADER_END
 

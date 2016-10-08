@@ -6,7 +6,7 @@ static const instruction_definition* kDefinitions[] = {
     &kTargetEntryDefinition, // TargetEntry
     &kJoinEntryDefinition, // JoinEntry
     NULL, // Goto
-    NULL, // ParallelMove
+    &kParallelMoveDefinition, // ParallelMove
     &kBoxDefinition, // Box
     &kUnboxDefinition, // Unbox
     &kPhiDefinition, // Phi
@@ -258,4 +258,12 @@ join_entry_instr_new(){
   array_init(&join->predecessors, 0x2);
   join->phis = NULL;
   return ((instruction*) join);
+}
+
+instruction*
+parallel_move_instr_new(){
+  parallel_move_instr* moves = malloc(sizeof(parallel_move_instr));
+  instr_init(((instruction*) moves), kParallelMoveInstr, moves);
+  array_init(&moves->moves, 0x4);
+  return ((instruction*) moves);
 }

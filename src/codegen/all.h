@@ -2,6 +2,7 @@
 #define MUN_ALL_H
 
 #include <mun/codegen/instruction.h>
+#include <mun/location.h>
 
 typedef struct _instruction_definition{
   void (*set_input_at)(instruction*, word, input*);
@@ -45,6 +46,7 @@ DECLARE_DEFINITION(JoinEntry);
 DECLARE_DEFINITION(StoreLocal);
 DECLARE_DEFINITION(LoadLocal);
 DECLARE_DEFINITION(Phi);
+DECLARE_DEFINITION(ParallelMove);
 #undef DECLARE_DEFINITION
 
 #define DEFINE_BLOCK(Name) \
@@ -113,5 +115,6 @@ DECLARE_DEFINITION(Phi);
 
 #include "definitions.h"
 #include "blocks.h"
+#include "parallel_move.h"
 
 #endif

@@ -7,6 +7,7 @@ HEADER_BEGIN
 
 #include "asm.h"
 #include "bitfield.h"
+#include "codegen/instruction.h"
 
 static const uword kInvalidLocation = 0x0;
 
@@ -58,7 +59,6 @@ loc_is_double_stack_slot(location loc){
   return loc_get_kind(loc) == kDoubleStackSlot;
 }
 
-
 bool loc_is_invalid(location loc);
 bool loc_is_constant(location loc);
 
@@ -72,11 +72,14 @@ loc_get_fpu_register(location loc){
   return ((asm_fpu_register) loc_get_payload(loc));
 }
 
+asm_register loc_get_stack_register(location loc);
+
 word loc_get_stack_slot(location loc);
 
 void loc_init(location* loc); // none
 void loc_init_s(location* loc); // same
 void loc_init_a(location* loc); // any
+void loc_init_c(location* loc, constant_instr* c);
 void loc_init_r(location* loc, asm_register reg); // register
 void loc_init_x(location* loc, asm_fpu_register reg); // fpu register
 void loc_init_z(location* loc, word slot); // stack slot
@@ -86,6 +89,10 @@ void loc_init_d(location* loc, word slot); // double stack slot
 void loc_hint_pr(location* loc); // hint prefers register
 void loc_hint_rr(location* loc); // hint requires register
 void loc_hint_rx(location* loc); // hint requires fpu register
+
+void loc_encode_stack_address(location loc, asm_address* addr);
+
+constant_instr* loc_get_constant(location loc);
 
 #define NO_CALL 0x0
 #define CALL 0x1
