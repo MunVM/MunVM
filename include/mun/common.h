@@ -34,6 +34,10 @@ typedef uintptr_t location;
 static const size_t kWordSize = sizeof(word);
 static const int kBitsPerByte = 8;
 static const int kBitsPerWord = sizeof(word) * 8;
+static const int kIllegalPosition = -1;
+static const int kNoVirtualRegister = -1;
+static const int kTempVirtualRegister = -2;
+static const int kMaxPosition = 0x7FFFFFFF;
 
 typedef struct _mun_alloc mun_alloc;
 

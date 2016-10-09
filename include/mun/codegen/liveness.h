@@ -70,6 +70,13 @@ array* var_liveness_compute_assigned_vars(variable_liveness* analysis);
 bool var_liveness_is_store_alive(variable_liveness* analysis, block_entry_instr* block, store_local_instr* store);
 bool var_liveness_is_last_load(variable_liveness* analysis, block_entry_instr* block, load_local_instr* load);
 
+typedef struct{
+  liveness_analysis analysis;
+  graph_entry_instr* gentry;
+} ssa_liveness;
+
+void ssa_liveness_init(ssa_liveness* analysis, flow_graph* graph);
+
 HEADER_END
 
 #endif

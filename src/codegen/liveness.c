@@ -132,3 +132,25 @@ var_liveness_init(variable_liveness* analysis, flow_graph* graph){
   analysis->analysis.compute_initial_sets = &var_liveness_compute_initial_sets;
   ARRAY(analysis->assigned_vars);
 }
+
+static void
+ssa_liveness_compute_initial_sets(liveness_analysis* analysis){
+  ssa_liveness* ssa = container_of(analysis, ssa_liveness, analysis);
+
+  word block_count = analysis->postorder.size;
+  for(word i = 0; i < block_count; i++){
+    block_entry_instr* block = analysis->postorder.data[i];
+
+    bit_vector* kill = analysis->kill.data[i];
+    bit_vector* live_in = analysis->live_in.data[i];
+
+    BACKWARD_ITER(block){
+    }
+  }
+}
+
+void
+ssa_liveness_init(ssa_liveness* analysis, flow_graph* graph){
+  liveness_init(((liveness_analysis*) analysis), graph->current_ssa_temp_index, &graph->postorder);
+  analysis->gentry = graph->graph_entry;
+}
