@@ -59,6 +59,7 @@ struct _block_entry_instr* instr_successor_at(instruction* instr, word index);
 word instr_successor_count(instruction* instr);
 word instr_input_count(instruction* instr);
 
+void instr_initialize_location_summary(instruction* instr);
 void instr_set_input_at(instruction* instr, word index, input* value);
 void instr_compile(instruction* instr, asm_buff* code);
 

@@ -145,12 +145,41 @@ ssa_liveness_compute_initial_sets(liveness_analysis* analysis){
     bit_vector* live_in = analysis->live_in.data[i];
 
     BACKWARD_ITER(block){
+      instr_initialize_location_summary(it);
+      location_summary* locs = it->locations;
+
+      if(instr_is_definition(it)){
+        definition* defn = container_of(it, definition, instr);
+        if(defn->temp_index >= 0){
+          bit_vector_add(kill, defn->ssa_temp_index);
+          bit_vector_remove(live_in, defn->ssa_temp_index);
+        }
+      }
+
+      for(word j = 0; j < instr_input_count(it); j++){
+        if(loc_is_constant(locs->inputs[j])) continue;
+        input* in = instr_input_at(it, j);
+        bit_vector_add(live_in, in->defn->ssa_temp_index);
+      }
     }
+
+    if(block->type == kJoinEntryBlock){
+      join_entry_instr* join = container_of(block, join_entry_instr, block);
+      //TODO: Analyze Phis
+    }
+  }
+
+  for(word i = 0; i < ssa->gentry->definitions.size; i++){
+    definition* defn = ssa->gentry->definitions.data[i];
+    word vreg = defn->ssa_temp_index;
+    bit_vector_add(analysis->kill.data[((block_entry_instr*) ssa->gentry)->postorder_num], vreg);
+    bit_vector_remove(analysis->live_in.data[((block_entry_instr*) ssa->gentry)->postorder_num], vreg);
   }
 }
 
 void
 ssa_liveness_init(ssa_liveness* analysis, flow_graph* graph){
   liveness_init(((liveness_analysis*) analysis), graph->current_ssa_temp_index, &graph->postorder);
+  ((liveness_analysis*) analysis)->compute_initial_sets = &ssa_liveness_compute_initial_sets;
   analysis->gentry = graph->graph_entry;
 }

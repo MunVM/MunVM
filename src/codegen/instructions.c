@@ -76,6 +76,14 @@ instr_is_definition(instruction* instr){
 }
 
 void
+instr_initialize_location_summary(instruction* instr){
+  const instruction_definition* definition = kDefinitions[instr->type];
+  if(definition != NULL && definition->make_location_summary != NULL){
+    instr->locations = definition->make_location_summary(instr);
+  }
+}
+
+void
 instr_set_input_at(instruction* instr, word index, input* value){
   value->instr = instr;
   value->index = index;
