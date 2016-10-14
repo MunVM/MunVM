@@ -155,3 +155,21 @@ DEFINE(Phi){
     &phi_input_at, // input_at
     &phi_name, // name
 };
+
+NAME(native_call);
+INPUT_COUNT(native_call, 0x0);
+
+DEFINE(NativeCall){
+    NULL, // set_input_at
+    &native_call_compile, // compile
+    NULL, // get_representation
+    NULL, // get_input_representation
+    NULL, // make_location_summary
+    NULL, // argument_at
+    NULL, // successor_at
+    NULL, // argument_count
+    &native_call_input_count, // input_count
+    NULL, // successor_count
+    NULL, // input_at
+    &native_call_name, // name
+};

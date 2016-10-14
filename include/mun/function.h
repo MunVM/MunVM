@@ -5,6 +5,7 @@
 
 HEADER_BEGIN
 
+#include "native.h"
 #include "ast.h"
 
 typedef struct _function{
@@ -12,6 +13,7 @@ typedef struct _function{
   int mods;
   ast_node* ast;
   uword code;
+  void (*native)(native_arguments* args);
   struct{
     word num_params;
     word num_stack_locals;
@@ -20,6 +22,8 @@ typedef struct _function{
     word first_stack_local_index;
   };
 } function;
+
+#define IS_NATIVE(func) ((func->mods & kMOD_NATIVE) == kMOD_NATIVE)
 
 MUN_INLINE void
 func_alloc_variables(function* func){

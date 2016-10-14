@@ -10,6 +10,7 @@
   location_summary* Name##_make_location_summary(instruction*);
 DECLARE_COMPILE(constant);
 DECLARE_COMPILE(return);
+DECLARE_COMPILE(native_call);
 #undef DECLARE_COMPILE
 
 #endif

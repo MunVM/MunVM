@@ -24,7 +24,8 @@ HEADER_BEGIN
   V(Return) \
   V(BinaryOp) \
   V(StoreLocal) \
-  V(LoadLocal)
+  V(LoadLocal) \
+  V(NativeCall)
 
 typedef enum{
 #define DEFINE_TYPE(Name) k##Name##Instr,
@@ -199,6 +200,7 @@ DECLARE_INSTRUCTION(goto, join_entry_instr*);
 DECLARE_INSTRUCTION(store_local, local_variable*, input*);
 DECLARE_INSTRUCTION(load_local, local_variable*);
 DECLARE_INSTRUCTION(phi, join_entry_instr*, word);
+DECLARE_INSTRUCTION(native_call, function*);
 #undef DECLARE_INSTRUCTION
 
 instance* constant_instr_get_value(instruction* instr);

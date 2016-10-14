@@ -65,4 +65,10 @@ struct _phi_instr{
   bool is_alive : 1;
 };
 
+struct _native_call_instr{
+  definition defn;
+
+  function* func;
+};
+
 #endif

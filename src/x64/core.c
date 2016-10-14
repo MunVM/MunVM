@@ -162,6 +162,13 @@ asm_addq_ra(asm_buff* self, asm_register dst, asm_address* src){
 }
 
 void
+asm_leaq(asm_buff* code, asm_register dst, asm_address* src){
+  emit_oper_rex(code, dst, src, REX_W);
+  asm_emit_uint8_t(code, 0x8D);
+  emit_oper(code, dst & 7, src);
+}
+
+void
 asm_addq_ri(asm_buff* self, asm_register dst, asm_imm src){
   if(is32(src)){
     emit_register_rex(self, dst, REX_W);
@@ -377,6 +384,28 @@ asm_testq_rr(asm_buff* self, asm_register r1, asm_register r2){
 }
 
 void
+asm_andq_rr(asm_buff* self, asm_register dst, asm_register src){
+  asm_operand oper;
+  asm_oper_init_r(&oper, src);
+  emit_oper_rex(self, dst, &oper, REX_W);
+  asm_emit_uint8_t(self, 0x23);
+  emit_oper(self, dst & 7, &oper);
+}
+
+void
+asm_andq_ri(asm_buff* self, asm_register dst, asm_imm src){
+  if(is32(src)){
+    emit_register_rex(self, dst, REX_W);
+    asm_operand oper;
+    asm_oper_init_r(&oper, dst);
+    emit_complex(self, 4, &oper, src);
+  } else{
+    asm_movq_ri(self, TMP, src);
+    asm_andq_rr(self, dst, TMP);
+  }
+}
+
+void
 asm_push_a(asm_buff* self, asm_address* src){
   emit_oper_rex(self, 6, src, REX_NONE);
   asm_emit_uint8_t(self, 0xFF);
@@ -441,6 +470,16 @@ asm_movq_ra(asm_buff* self, asm_register dst, asm_address* src){
   emit_oper_rex(self, dst, src, REX_W);
   asm_emit_uint8_t(self, 0x8B);
   emit_oper(self, dst & 7, src);
+}
+
+void
+asm_call_r(asm_buff* self, asm_register reg){
+  asm_operand oper;
+  asm_oper_init_r(&oper, reg);
+
+  emit_oper_rex(self, 2, &oper, REX_NONE);
+  asm_emit_uint8_t(self, 0xFF);
+  emit_oper(self, 2, &oper);
 }
 
 void

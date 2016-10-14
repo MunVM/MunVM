@@ -177,12 +177,26 @@ void asm_cmpq_ri(asm_buff* self, asm_register r1, asm_imm imm);
 // ret
 void asm_ret(asm_buff* self);
 
+// leaq
+void asm_leaq(asm_buff* self, asm_register dst, asm_address* src);
+
+// call
+void asm_call_r(asm_buff* self, asm_register r);
+
+// andq
+void asm_andq_rr(asm_buff* self, asm_register dst, asm_register src);
+void asm_andq_ri(asm_buff* self, asm_register dst, asm_imm src);
+
 // testq
 void asm_testq_rr(asm_buff* self, asm_register r1, asm_register r2);
 
 // Helpers
 void asm_enter_frame(asm_buff* self, word frame_size);
 void asm_leave_frame(asm_buff* self);
+
+#define ADDRESS(Name, Register, Offset) \
+  asm_address Name##_addr; \
+  asm_addr_init_r(&Name##_addr, Register, Offset);
 
 HEADER_END
 

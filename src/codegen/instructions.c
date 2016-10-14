@@ -15,7 +15,8 @@ static const instruction_definition* kDefinitions[] = {
     &kReturnDefinition, // Return
     &kBinaryOpDefinition, // BinaryOp
     &kStoreLocalDefinition, // StoreLocal
-    NULL, // LoadLocal
+    NULL, // LoadLocal,
+    &kNativeCallDefinition, // NativeCall
 };
 
 MUN_INLINE void
@@ -274,4 +275,12 @@ parallel_move_instr_new(){
   instr_init(((instruction*) moves), kParallelMoveInstr, moves);
   array_init(&moves->moves, 0x4);
   return ((instruction*) moves);
+}
+
+instruction*
+native_call_instr_new(function* func){
+  native_call_instr* native_call = malloc(sizeof(native_call_instr));
+  instr_init(((instruction*) native_call), kNativeCallInstr, native_call);
+  native_call->func = func;
+  return ((instruction*) native_call);
 }
