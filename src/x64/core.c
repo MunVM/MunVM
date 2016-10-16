@@ -406,6 +406,15 @@ asm_andq_ri(asm_buff* self, asm_register dst, asm_imm src){
 }
 
 void
+asm_addsd_rr(asm_buff* self, asm_fpu_register dst, asm_fpu_register src){
+  asm_emit_uint8_t(self, 0xF2);
+  emit_rex_rb_xx(self, src, dst, REX_NONE);
+  asm_emit_uint8_t(self, 0x0F);
+  asm_emit_uint8_t(self, 0x58);
+  emit_xmm_register_operand(self, dst & 7, src);
+}
+
+void
 asm_push_a(asm_buff* self, asm_address* src){
   emit_oper_rex(self, 6, src, REX_NONE);
   asm_emit_uint8_t(self, 0xFF);

@@ -1,7 +1,6 @@
-#include <mun/codegen/graph.h>
+#include <mun/codegen/flow_graph.h>
 #include <mun/bitvec.h>
 #include <mun/codegen/liveness.h>
-#include <mun/array.h>
 #include "all.h"
 
 definition*
@@ -208,6 +207,13 @@ graph_rename_recursive(flow_graph* graph, block_entry_instr* block, array* /* de
   }
 
   FORWARD_ITER(block){
+    if(instr_is_definition(it)){
+      definition* defn = container_of(it, definition, instr);
+      defn->ssa_temp_index = graph_alloc_ssa_temp_index(graph);
+    }
+
+    /*
+     * TODO: Renaming Environment?
     for(word i = instr_input_count(it) - 1; i >= 0; i--){
       input* in = instr_input_at(it, i);
       definition* reach = array_pop(env);
@@ -230,7 +236,7 @@ graph_rename_recursive(flow_graph* graph, block_entry_instr* block, array* /* de
           word index = local_var_bit_index(to_store_local_instr(it)->local, ((int) func_num_non_copied_params(graph->func)));
           result = to_store_local_instr(it)->value->defn;
 
-          if(var_liveness_is_store_alive(analysis, block, to_store_local_instr(it))){
+          if(variable_liveness_is_store_alive(analysis, block, to_store_local_instr(it))){
             env->data[index] = result;
           } else{
             env->data[index] = cnull;
@@ -247,11 +253,12 @@ graph_rename_recursive(flow_graph* graph, block_entry_instr* block, array* /* de
             }
           }
 
-          if(var_liveness_is_last_load(analysis, block, to_load_local_instr(it))){
+          if(variable_liveness_is_last_load(analysis, block, to_load_local_instr(it))){
             env->data[index] = cnull;
           }
         } else{
-          result = graph_get_constant(graph, to_constant_instr(it)->value);
+          result = container_of(it, definition, instr);
+          graph_alloc_ssa_indexes(graph, result);
         }
 
         if(defn->temp_index >= 0){
@@ -264,6 +271,7 @@ graph_rename_recursive(flow_graph* graph, block_entry_instr* block, array* /* de
         }
       }
     }
+     */
   }
 
   for(word i = 0; i < block->dominated.size; i++){
@@ -301,13 +309,13 @@ graph_compute_ssa(flow_graph* graph, word vreg){
   ARRAY(dominance);
   compute_dominators(graph, &dominance);
 
-  variable_liveness var_liveness;
-  var_liveness_init(&var_liveness, graph);
-  liveness_analyze(((liveness_analysis*) &var_liveness));
+  variable_liveness variable_liveness;
+  variable_liveness_init(&variable_liveness, graph);
+  liveness_analyze(((liveness_analysis*) &variable_liveness));
 
   array live_phis; // phi_instr*
-  insert_phis(graph, &graph->preorder, var_liveness_compute_assigned_vars(&var_liveness), &dominance, &live_phis);
-  graph_rename(graph, &live_phis, &var_liveness);
+  insert_phis(graph, &graph->preorder, variable_liveness_compute_assigned(&variable_liveness), &dominance, &live_phis);
+  graph_rename(graph, &live_phis, &variable_liveness);
 }
 
 #define OWNER vis->owner
@@ -425,6 +433,21 @@ evis_visit_load_local(ast_node_visitor* vis, ast_node* node){
   // Fallthrough
 }
 
+static void
+evis_visit_binary_op(ast_node_visitor* vis, ast_node* node){
+  value_visitor for_left_value;
+  vvis_init(&for_left_value, EVIS(vis)->owner);
+  ast_visit(((ast_node_visitor*) &for_left_value), node->as.binary_op.left);
+  evis_append(EVIS(vis), for_left_value.visitor);
+
+  value_visitor for_right_value;
+  vvis_init(&for_right_value, EVIS(vis)->owner);
+  ast_visit(((ast_node_visitor*) &for_right_value), node->as.binary_op.right);
+  evis_append(EVIS(vis), for_right_value.visitor);
+
+  vis_return_definition(vis, ((definition*) binary_op_instr_new(node->as.binary_op.oper, for_left_value.value, for_right_value.value)));
+}
+
 #define BIND(func) evis->visitor.visit_##func = evis_visit_##func;
 
 void
@@ -438,6 +461,7 @@ evis_init(effect_visitor* evis, flow_graph_builder* owner){
   BIND(return);
   BIND(store_local);
   BIND(load_local);
+  BIND(binary_op);
 }
 
 static void

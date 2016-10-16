@@ -32,6 +32,7 @@ MUN_INLINE void
 block_init(block_entry_instr* block, block_type type){
   block->type = type;
   block->last = NULL;
+  array_init(&block->dominated, 0x1);
 }
 
 input*
@@ -119,6 +120,8 @@ instr_name(instruction* instr){
 
 static const block_definition* kBlockDefinitions[] = {
     &kGraphEntryBlockDefinition,
+    &kTargetEntryBlockDefinition,
+    &kJoinEntryBlockDefinition,
 };
 
 void
@@ -283,4 +286,15 @@ native_call_instr_new(function* func){
   instr_init(((instruction*) native_call), kNativeCallInstr, native_call);
   native_call->func = func;
   return ((instruction*) native_call);
+}
+
+instruction*
+binary_op_instr_new(int oper, input* left, input* right){
+  binary_op_instr* bop = malloc(sizeof(binary_op_instr));
+  instruction* ret = ((instruction*) bop);
+  instr_init(ret, kBinaryOpInstr, bop);
+  bop->operation = oper;
+  instr_set_input_at(ret, 0, left);
+  instr_set_input_at(ret, 1, right);
+  return ret;
 }

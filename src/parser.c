@@ -3,6 +3,8 @@
 #include <mun/alloc.h>
 #include <ctype.h>
 #include <mun/function.h>
+#include <mun/type.h>
+#include <mun/array.h>
 
 static int
 lex_keyword(char* kw){
@@ -75,6 +77,9 @@ next_token(parser* parse){
     case ',': return token_new(kCOMMA, ",");
     case '=': return token_new(kEQUALS, "=");
     case '+': return token_new(kADD, "+");
+    case '*': return token_new(kMUL, "*");
+    case '-': return token_new(kSUB, "-");
+    case '/': return token_new(kDIV, "/");
     default: break;
   }
 
@@ -248,6 +253,16 @@ parse(parser* parse, instance* script){
 
   while(parser_peek(parse) != EOF){
     parse_statement(parse, script);
+  }
+
+  ast_node* seq = script->as.script.main->ast;
+  if(((ast_node*) array_last(seq->as.sequence.children))->type != kReturnNode){
+    ast_node* prev = array_last(seq->as.sequence.children);
+    switch(prev->type){
+      case kStoreLocalNode: prev = prev->as.store_local.value; break;
+      default: break;
+    }
+    array_insert(seq->as.sequence.children, seq->as.sequence.children->size - 1, return_node_new(parse->gc, prev));
   }
 
   fclose(parse->file);

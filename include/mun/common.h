@@ -83,6 +83,9 @@ wdup(word value){
   return nword;
 }
 
+//TODO: Remove In Production
+extern mun_alloc* GC;
+
 HEADER_END
 
 #endif

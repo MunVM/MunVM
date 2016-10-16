@@ -11,6 +11,8 @@
 DECLARE_COMPILE(constant);
 DECLARE_COMPILE(return);
 DECLARE_COMPILE(native_call);
+DECLARE_COMPILE(store_local);
+DECLARE_COMPILE(binary_op);
 #undef DECLARE_COMPILE
 
 #endif

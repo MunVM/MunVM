@@ -49,10 +49,10 @@ INPUT_AT(binary_op, inputs[index]);
 
 DEFINE(BinaryOp){
     &binary_op_set_input_at, // set_input_at
-    NULL, // compile
+    &binary_op_compile, // compile
     NULL, // get_representation
     NULL, // get_input_representation
-    NULL, // make_location_summary
+    &binary_op_make_location_summary, // make_location_summary
     NULL, // argument_at
     NULL, // successor_at
     NULL, // argument_count
@@ -106,10 +106,10 @@ INPUT_AT(store_local, value);
 
 DEFINE(StoreLocal){
     &store_local_set_input_at, // set_input_at
-    NULL, // compile
+    &store_local_compile, // compile
     NULL, // get_representation
     NULL, // get_input_representation
-    NULL, // make_location_summary
+    &store_local_make_location_summary, // make_location_summary
     NULL, // argument_at
     NULL, // successor_at
     NULL, // argument_count

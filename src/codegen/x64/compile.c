@@ -1,4 +1,7 @@
 #include <mun/common.h>
+#include <mun/type.h>
+#include <assert.h>
+
 #if defined(ARCH_IS_X64)
 
 #include "../all.h"
@@ -9,6 +12,16 @@
 #define SUMMARIZE(Name) \
   location_summary* \
   Name##_make_location_summary(instruction* instr)
+
+SUMMARIZE(store_local){
+  location_summary* locs = loc_summary_new(1, 0, NO_CALL);
+  loc_init_r(&locs->inputs[0], RDI);
+  return locs;
+}
+
+COMPILE(store_local){
+  asm_register store = loc_get_register(instr->locations->inputs[0]);
+}
 
 SUMMARIZE(return){
   location_summary* locs = loc_summary_new(1, 0, NO_CALL);
@@ -26,16 +39,18 @@ SUMMARIZE(constant){
   return loc_summary_make(0, out, NO_CALL);
 }
 
-static void
-call_native(mun_native_args args, mun_native_function func){
-  func(args);
-}
-
 COMPILE(constant){
   location_summary* locs = instr->locations;
+  printf("Constant %f := #%s\n", to_constant_instr(instr)->value->as.number, asm_registers[loc_get_register(locs->output)]);
+
   if(loc_is_register(locs->output)){
     asm_movq_ri(code, loc_get_register(locs->output), ((asm_imm) to_constant_instr(instr)->value));
   }
+}
+
+static void
+call_native(mun_native_args args, mun_native_function func){
+  func(args);
 }
 
 COMPILE(native_call){
@@ -69,6 +84,47 @@ COMPILE(native_call){
   asm_call_r(code, RAX);
 
   asm_pop_r(code, loc_get_register(locs->output));
+}
+
+SUMMARIZE(binary_op){
+  location_summary* locs = loc_summary_new(2, 0, NO_CALL);
+  loc_init_r(&locs->inputs[0], RAX);
+  loc_init_r(&locs->inputs[1], RBX);
+  loc_init_r(&locs->output, RAX);
+  return locs;
+}
+
+COMPILE(binary_op){
+  location_summary* locs = instr->locations;
+
+  asm_register r1 = loc_get_register(locs->inputs[0]);
+  asm_register r2 = loc_get_register(locs->inputs[1]);
+  asm_register r3 = loc_get_register(locs->output);
+
+  asm_address r1_val_addr;
+  asm_addr_init_r(&r1_val_addr, r1, offsetof(instance, as.number));
+
+  asm_address r2_val_addr;
+  asm_addr_init_r(&r2_val_addr, r2, offsetof(instance, as.number));
+
+  asm_movsd_ra(code, XMM0, &r1_val_addr);
+  asm_movsd_ra(code, XMM1, &r2_val_addr);
+  switch(to_binary_op_instr(instr)->operation){
+    case kAdd: asm_addsd_rr(code, XMM0, XMM1); break;
+    case kSubtract: asm_subsd_rr(code, XMM0, XMM1); break;
+    case kMultiply: asm_mulsd_rr(code, XMM0, XMM1); break;
+    case kDivide: asm_divsd_rr(code, XMM0, XMM1); break;
+    default:{
+      fprintf(stderr, "Unreachable\n");
+      abort();
+    }
+  }
+
+  asm_address r3_val_addr;
+  asm_addr_init_r(&r3_val_addr, r3, offsetof(instance, as.number));
+
+  asm_movq_ri(code, r3, ((asm_imm) number_new(GC, 0.0)));
+  asm_movsd_ar(code, &r3_val_addr, XMM0);
 }
 
 #endif

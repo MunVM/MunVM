@@ -34,6 +34,7 @@ array_last(array* self){
 
 MUN_INLINE V
 array_pop(array* self){
+  if(self->size == 0) return NULL;
   V res = self->data[self->size - 1];
   self->size--;
   return res;
@@ -60,6 +61,12 @@ array_add_all(array* self, array* src){
 MUN_INLINE void
 array_truncate(array* self, word size){
   self->size = size;
+}
+
+MUN_INLINE void
+array_erase(array* self, word index){
+  for(word i = index; i < self->size - 1; i++) self->data[i] = self->data[i + 1];
+  self->size -= 1;
 }
 
 MUN_INLINE bool

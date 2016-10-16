@@ -6,7 +6,7 @@
 HEADER_BEGIN
 
 #include "../asm.h"
-#include "graph.h"
+#include "flow_graph.h"
 #include "move_resolver.h"
 
 typedef struct _flow_graph_compiler{
