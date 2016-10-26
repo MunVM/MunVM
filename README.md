@@ -34,4 +34,4 @@ The [Dart](https://github.com/dart-lang/sdk) Team - Great learning tool for deve
 
 # License
 
-Mun is licensed as GPLv3 a full overview of the license can be found [here](https://github.com/MunVM/MunVM/blob/master/LICENSE.md)
+Mun is licensed as MIT a full overview of the license can be found [here](https://github.com/MunVM/MunVM/blob/master/LICENSE.md)
